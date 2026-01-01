@@ -3,7 +3,7 @@ Configuration file for MorphIt sphere packing system.
 """
 
 import torch
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Any, Tuple
 
 
@@ -103,9 +103,9 @@ class VisualizationConfig:
 class MorphItConfig:
     """Main configuration class combining all sub-configurations."""
 
-    model: ModelConfig = ModelConfig()
-    training: TrainingConfig = TrainingConfig()
-    visualization: VisualizationConfig = VisualizationConfig()
+    model: ModelConfig = field(default_factory=ModelConfig)
+    training: TrainingConfig = field(default_factory=TrainingConfig)
+    visualization: VisualizationConfig = field(default_factory=VisualizationConfig)
 
     # Output configuration
     results_dir: str = "results/output"
