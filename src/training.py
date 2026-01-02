@@ -67,12 +67,13 @@ class MorphItTrainer:
         model_name = Path(self.model.mesh_path).stem
         self.convergence_tracker = ConvergenceTracker(model_name)
 
-        # Setup evolution logger
-        self.evolution_logger = SphereEvolutionLogger("sphere_evolution")
-        self.model.evolution_logger = self.evolution_logger
+        # Setup evolution logger only if logging is enabled
+        if self.config.training.logging_enabled:
+            self.evolution_logger = SphereEvolutionLogger("sphere_evolution")
+            self.model.evolution_logger = self.evolution_logger
 
-        # Log initial state
-        self.evolution_logger.log_spheres(self.model, 0, "initial")
+            # Log initial state
+            self.evolution_logger.log_spheres(self.model, 0, "initial")
 
     def setup_rendering(self):
         """Setup rendering if PyVista is available."""
@@ -123,9 +124,7 @@ class MorphItTrainer:
                 self._perform_density_control(iteration)
 
             # Log sphere evolution
-            if (
-                self.config.training.logging_enabled and iteration % 1 == 0
-            ):  # Log every iteration
+            if self.evolution_logger is not None and iteration % 1 == 0:
                 self.evolution_logger.log_spheres(self.model, iteration, "training")
 
         # Cleanup and finalize
@@ -303,9 +302,10 @@ class MorphItTrainer:
         # Final pruning
         self.density_controller.prune_spheres()
 
-        # Log final state
-        self.evolution_logger.log_spheres(self.model, self.current_iteration, "final")
-        self.evolution_logger.save_complete_evolution()
+        # Log final state only if logging is enabled
+        if self.evolution_logger is not None:
+            self.evolution_logger.log_spheres(self.model, self.current_iteration, "final")
+            self.evolution_logger.save_complete_evolution()
 
         # Print summary
         self._print_training_summary()
